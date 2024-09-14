@@ -20,20 +20,6 @@ const (
 
 var predefinedToken = ""
 
-// Predefined token for authentication (example, replace with dynamic tokens in production)
-
-// func splitJWT(token string) (header, payload, signature string, err error) {
-// 	// Split the token by dot (`.`)
-// 	fmt.Printf("token :%s\n", token)
-// 	parts := strings.Split(token, ".")
-// 	if len(parts) != 3 {
-// 		return "", "", "", fmt.Errorf("invalid token format")
-// 	}
-
-// 	return parts[0], parts[1], parts[2], nil
-// }
-
-// LoginHandler handles user login and returns a token if credentials are valid
 func LoginHandler(c *gin.Context) {
 	var loginRequest struct {
 		Username string `json:"username" binding:"required"`
@@ -80,42 +66,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Extract token from the header
-		// tokenString = tokenString[7:] // Remove "Bearer " prefix
-
-		// Check if the token has the correct number of segments
-		// header, payload, signature, err := splitJWT(tokenString)
-		// if err != nil {
-		// 	fmt.Println("Error:", err)
-		// } else {
-		// 	fmt.Println("Header:", header)
-		// 	fmt.Println("Payload:", payload)
-		// 	fmt.Println("Signature:", signature)
-		// }
-
-		// Decode and verify the token
-		// token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// 	// Ensure the token method conforms to the expected signing method
-		// 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-		// 		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		// 	}
-		// 	return jwtSecret, nil
-		// })
-
-		// if err != nil {
-		// 	// Print the detailed error message
-		// 	fmt.Printf("Error during token parsing: %s\n", err)
-		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-		// 	c.Abort()
-		// 	return
-		// }
-
-		// if !token.Valid {
-		// 	fmt.Println("Token is not valid")
-		// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-		// 	c.Abort()
-		// 	return
-		// }{
 		if predefinedToken == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"message": "Login Fails"})
 			c.Abort()

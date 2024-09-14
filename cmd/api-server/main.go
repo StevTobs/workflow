@@ -1,11 +1,8 @@
 package main
 
 import (
-	// aunt "item-workflow-system/internal/aunt"// Import the authentication functions
-
 	aunt "item-workflow-system/internal/aunt"
 	metrics "item-workflow-system/internal/metrics"
-
 	"github.com/gin-gonic/gin"
 )
 
