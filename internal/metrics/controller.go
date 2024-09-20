@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	model "item-workflow-system/internal/model"
 	"net/http"
 	"strconv"
 
@@ -9,8 +8,8 @@ import (
 )
 
 // ReadAllItems fetches all items from the model and returns them in a JSON response.
-func ReadAllItems(c *gin.Context) {
-	items, err := model.GetAllItems()
+func ReadAllItems_(c *gin.Context) {
+	items, err := GetAllItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch items"})
 		return
@@ -19,7 +18,7 @@ func ReadAllItems(c *gin.Context) {
 }
 
 
-func CreateItem(c *gin.Context) {
+func CreateItem_(c *gin.Context) {
 	var requestBody struct {
 		Title    string `json:"title" binding:"required"`
 		Amount   int    `json:"amount" binding:"required"`
@@ -31,7 +30,7 @@ func CreateItem(c *gin.Context) {
 		return
 	}
 
-	newId, err := model.CreateItem(requestBody.Title, requestBody.Amount, requestBody.Quantity)
+	newId, err := CreateItem(requestBody.Title, requestBody.Amount, requestBody.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create item"})
 		return
@@ -41,7 +40,7 @@ func CreateItem(c *gin.Context) {
 }
 
 // Define the PUT endpoint to update an item by ID (protected)
-func UpdateItem(c *gin.Context) {
+func UpdateItem_(c *gin.Context) {
 	var requestBody struct {
 		Title    string `json:"title" binding:"required"`
 		Amount   int    `json:"amount" binding:"required"`
@@ -60,7 +59,7 @@ func UpdateItem(c *gin.Context) {
 		return
 	}
 
-	err = model.UpdateItem(id, requestBody.Title, requestBody.Amount, requestBody.Quantity)
+	err = UpdateItem(id, requestBody.Title, requestBody.Amount, requestBody.Quantity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item"})
 		return
@@ -70,7 +69,7 @@ func UpdateItem(c *gin.Context) {
 }
 
 // Define the PATCH endpoint to update the status of an item by ID (protected)
-func PatialUpdateItem(c *gin.Context) {
+func PatialUpdateItem_(c *gin.Context) {
 	var requestBody struct {
 		Status string `json:"status" binding:"required"`
 	}
@@ -92,7 +91,7 @@ func PatialUpdateItem(c *gin.Context) {
 		return
 	}
 
-	err = model.UpdateItemStatus(id, requestBody.Status)
+	err = UpdateItemStatus(id, requestBody.Status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item status"})
 		return
@@ -102,7 +101,7 @@ func PatialUpdateItem(c *gin.Context) {
 }
 
 // Define the DELETE endpoint to delete an item by ID (protected)
-func RemoveItem(c *gin.Context) {
+func RemoveItem_(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
@@ -110,7 +109,7 @@ func RemoveItem(c *gin.Context) {
 		return
 	}
 
-	err = model.DeleteItem(id)
+	err = DeleteItem(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
 		return

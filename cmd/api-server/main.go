@@ -1,8 +1,15 @@
 package main
 
 import (
-	aunt "item-workflow-system/internal/aunt"
+	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
+	auth "item-workflow-system/internal/auth"
 	metrics "item-workflow-system/internal/metrics"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,26 +19,46 @@ func main() {
 	r := gin.Default()
 
 	// Authentication routes
-	r.POST("/login", aunt.LoginHandler)
-	r.POST("/logout", aunt.LogoutHandler)
+	r.POST("/login", auth.LoginHandler)
+	r.POST("/logout", auth.LogoutHandler)
 
-	// Apply AuthMiddleware to protected routes
 	protected := r.Group("/")
-	protected.Use(aunt.AuthMiddleware())
+	protected.Use(auth.AuthMiddleware())
 	{
-		// Define the POST endpoint to create a new item (protected)
-		protected.POST("/items", aunt.AuthMiddleware(), metrics.CreateItem)
-
-		protected.GET("/items", aunt.AuthMiddleware(), metrics.ReadAllItems)
-		// Define the PUT endpoint to update an item by ID (protected)
-		protected.PUT("/items/:id", aunt.AuthMiddleware(), metrics.UpdateItem)
-		// Define the PATCH endpoint to update the status of an item by ID (protected)
-		protected.PATCH("/items/:id/status", aunt.AuthMiddleware(), metrics.PatialUpdateItem)
-		// Define the DELETE endpoint to delete an item by ID (protected)
-		protected.DELETE("/items/:id", aunt.AuthMiddleware(), metrics.RemoveItem)
-
+		protected.POST("/items", metrics.CreateItem_)
+		protected.GET("/items", metrics.ReadAllItems_)
+		protected.PUT("/items/:id", metrics.UpdateItem_)
+		protected.PATCH("/items/:id/status", metrics.PatchItemStatusHandler)
+		protected.DELETE("/items/:id", metrics.RemoveItem_)
 	}
 
-	// Run the server
-	r.Run(":2024")
+	// Create a server
+	srv := &http.Server{
+		Addr:    ":3000",
+		Handler: r,
+	}
+
+	// Run the server in a goroutine so that it doesn't block
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			gin.DefaultWriter.Write([]byte("Server failed to start: " + err.Error()))
+		}
+	}()
+
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+
+	<-stop // Wait for interrupt signal
+
+	// Create a context with a timeout for shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Attempt to gracefully shut down the server
+	if err := srv.Shutdown(ctx); err != nil {
+		gin.DefaultWriter.Write([]byte("Server shutdown failed: " + err.Error()))
+	}
+
+	gin.DefaultWriter.Write([]byte("Server exited properly"))
 }

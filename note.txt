@@ -1,0 +1,9 @@
+
+to run with enviroment variable
+
+export DATABASE_URL="postgres://admin:secret@localhost/mydb"
+export PORT=2024
+
+or
+
+> DATABASE_URL="postgres://admin:secret@localhost:2024/mydb" PORT=2024 go run cmd/api-server/main.go
