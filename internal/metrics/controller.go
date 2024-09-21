@@ -1,13 +1,28 @@
 package metrics
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
-
 	"github.com/gin-gonic/gin"
 )
+type Message struct {
+	Text string `json:"text"`
+}
 
-// ReadAllItems fetches all items from the model and returns them in a JSON response.
+func messageHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*") // Allow CORS
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == http.MethodGet {
+		response := Message{Text: "Hello from Go server!"}
+		json.NewEncoder(w).Encode(response)
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
 func ReadAllItems_(c *gin.Context) {
 	items, err := GetAllItems()
 	if err != nil {
@@ -17,7 +32,28 @@ func ReadAllItems_(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
+// Dummy function to simulate getting an item by ID (replace with your actual implementation)
+var ErrItemNotFound = errors.New("item not found")
+func ReadItemByID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
 
+	item, err := GetItemByID(id)
+	if err != nil {
+		if err == ErrItemNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch item"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, item)
+}
 func CreateItem_(c *gin.Context) {
 	var requestBody struct {
 		Title    string `json:"title" binding:"required"`
@@ -37,9 +73,10 @@ func CreateItem_(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item created successfully", "id": newId})
+	
 }
 
-// Define the PUT endpoint to update an item by ID (protected)
+
 func UpdateItem_(c *gin.Context) {
 	var requestBody struct {
 		Title    string `json:"title" binding:"required"`
@@ -68,7 +105,7 @@ func UpdateItem_(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Item updated successfully"})
 }
 
-// Define the PATCH endpoint to update the status of an item by ID (protected)
+
 func PatialUpdateItem_(c *gin.Context) {
 	var requestBody struct {
 		Status string `json:"status" binding:"required"`
@@ -100,7 +137,7 @@ func PatialUpdateItem_(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Item status updated successfully"})
 }
 
-// Define the DELETE endpoint to delete an item by ID (protected)
+
 func RemoveItem_(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)

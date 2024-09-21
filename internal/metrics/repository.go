@@ -26,7 +26,7 @@ func InitDB() {
 	DATABASE_URL := os.Getenv("DATABASE_URL")
 	PORT := os.Getenv("PORT")
 
-	// Check if variables are set
+
 	if DATABASE_URL == "" {
 		log.Fatal("DATABASE_URL is not set")
 	}
@@ -42,30 +42,6 @@ func InitDB() {
 
 	fmt.Printf("Connected to the database on port %s!\n", PORT)
 }
-
-// var DB *pgxpool.Pool
-
-// func InitDB() {
-//     // Load environment variables
-//     DATABASE_URL := os.Getenv("DATABASE_URL")
-//     PORT := os.Getenv("PORT")
-
-//     // Check if variables are set
-//     if DATABASE_URL == "" {
-//         log.Fatal("DATABASE_URL is not set")
-//     }
-//     if PORT == "" {
-//         log.Fatal("PORT is not set")
-//     }
-
-//     var err error
-//     DB, err = pgxpool.Connect(context.Background(), DATABASE_URL)
-//     if err != nil {
-//         log.Fatalf("Unable to connect to the database: %v\n", err)
-//     }
-
-//     fmt.Printf("Connected to the database on port %s!\n", PORT)
-// }
 
 
 func CreateItem(title string, amount int, quantity int) (int, error) {
